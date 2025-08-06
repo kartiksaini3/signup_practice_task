@@ -4,7 +4,10 @@ import { bulkInsertDataToTable } from "./bulk-insert.repository.js";
 export const bulkInsertToTable = async (req, res) => {
   const { data } = req.body;
   const { tableName } = req.params;
-  if (!Array.isArray(data)) commonReturn(res, "Invalid data format", null, 400);
+
+  if (!Array.isArray(data)) {
+    return commonReturn(res, 400, false, null, "Invalid data format");
+  }
 
   const allowedTables = [
     "OrganisationCategory",
@@ -14,9 +17,15 @@ export const bulkInsertToTable = async (req, res) => {
     "AuditInstance",
     "AuditeeOrganisation",
   ];
+
   if (!allowedTables.includes(tableName)) {
-    commonReturn(res, "Invalid table name", null, 400);
+    return commonReturn(res, "Invalid table name", null, 400);
   }
-  await bulkInsertDataToTable(data, tableName);
-  commonReturn(res, "Inserted successfully");
+
+  try {
+    await bulkInsertDataToTable(data, tableName);
+    return commonReturn(res, "Inserted successfully");
+  } catch (err) {
+    return commonReturn(res, null, null, 500);
+  }
 };
