@@ -1,4 +1,12 @@
+import { Client } from "pg";
+import dotenv from "dotenv";
 import { commonReturn } from "../utils/functions.js";
+
+dotenv.config();
+
+const client = new Client({
+  connectionString: process.env.DB_URL,
+});
 
 export const createUser = async ({ email, hashedPassword }, res) => {
   const query = `
@@ -8,7 +16,7 @@ export const createUser = async ({ email, hashedPassword }, res) => {
   `;
 
   try {
-    await pool.query(query, [email, hashedPassword]);
+    await client.query(query, [email, hashedPassword]);
   } catch (err) {
     console.error("DB Error:", err);
 
@@ -26,6 +34,6 @@ export const getUserByUsername = async (email) => {
     LIMIT 1;
   `;
 
-  const result = await pool.query(query, [email]);
+  const result = await client.query(query, [email]);
   return result.rows[0]; // returns undefined if not found
 };
