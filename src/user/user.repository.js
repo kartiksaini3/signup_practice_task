@@ -18,12 +18,7 @@ export const createUser = async ({ email, hashedPassword }, res) => {
   try {
     await client.query(query, [email, hashedPassword]);
   } catch (err) {
-    console.error("DB Error:", err);
-
-    // 23505 = unique_violation in PostgreSQL
-    if (err.code === "23505") {
-      commonReturn(res, "User Already Exists", null, 400);
-    } else commonReturn(res, null, null, 500);
+    throw err;
   }
 };
 

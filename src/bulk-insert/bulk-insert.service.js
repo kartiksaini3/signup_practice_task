@@ -25,7 +25,7 @@ export const bulkInsertToTable = async (req, res) => {
   try {
     await bulkInsertDataToTable(data, tableName);
     return commonReturn(res, "Inserted successfully");
-  } catch (err) {
+  } catch {
     return commonReturn(res, null, null, 500);
   }
 };

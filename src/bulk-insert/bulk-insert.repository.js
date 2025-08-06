@@ -32,8 +32,7 @@ export const bulkInsertDataToTable = async (data, tableName) => {
       RETURNING *;
     `;
 
-    const result = await client.query(insertQuery, data);
-    return { message: "Inserted successfully", inserted: result.rows };
+    await client.query(insertQuery, data);
   } catch (err) {
     throw err;
   } finally {
