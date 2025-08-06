@@ -10,12 +10,12 @@ import { authenticateToken } from "../middlewares.js";
 
 export const userRoutes = express.Router();
 
-userRoutes.get(
+userRoutes.post(
   "/send-mail-to-user",
   authenticateToken,
   checkIfUserAlreadyExists
 );
-userRoutes.get("/check-user", checkIfUserAlreadyExists);
+userRoutes.post("/check-user", checkIfUserAlreadyExists);
 userRoutes.post("/sign-up", signUp);
 userRoutes.post("/sign-in", signIn);
 userRoutes.post("/send-otp", sendOTP);
