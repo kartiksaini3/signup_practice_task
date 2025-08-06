@@ -1,4 +1,4 @@
-import { commonReturn } from "../utils/functions";
+import { commonReturn } from "../utils/functions.js";
 
 export const createUser = async ({ email, hashedPassword }, res) => {
   const query = `
