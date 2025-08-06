@@ -13,7 +13,9 @@ export const createTables = async () => {
 
     // Create users table
     await client.query(`
+      CREATE EXTENSION IF NOT EXISTS "pgcrypto";
         CREATE TABLE IF NOT EXISTS users (
+          id UUID DEFAULT gen_random_uuid(),
           name TEXT NOT NULL,
           email TEXT UNIQUE NOT NULL PRIMARY KEY,
           role TEXT,
@@ -25,9 +27,10 @@ export const createTables = async () => {
 
     // Create reports table
     await client.query(`
+      CREATE EXTENSION IF NOT EXISTS "pgcrypto";
         CREATE TABLE IF NOT EXISTS reports (
-          report_id SERIAL PRIMARY KEY,
-          auditor_id INTEGER REFERENCES users(email) ON DELETE SET NULL,
+          report_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          auditor_id TEXT REFERENCES users(email) ON DELETE SET NULL,
           report_name TEXT NOT NULL,
           report_status TEXT,
           is_approved BOOLEAN DEFAULT FALSE

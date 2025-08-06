@@ -4,7 +4,6 @@ import { bulkInsertDataToTable } from "./bulk-insert.repository.js";
 export const bulkInsertToTable = async (req, res) => {
   const { data } = req.body;
   const { tableName } = req.params;
-  console.log("tableName", tableName);
   if (!Array.isArray(data)) commonReturn(res, "Invalid data format", null, 400);
 
   const allowedTables = [
