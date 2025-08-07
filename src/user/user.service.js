@@ -1,6 +1,10 @@
 import { compare, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
-import { createUser, getUserByEmail } from "./user.repository.js";
+import {
+  createUser,
+  getUserByEmail,
+  updateUserPassword,
+} from "./user.repository.js";
 import {
   commonReturn,
   sendLinkViaSendGrid,
@@ -12,8 +16,9 @@ export const checkIfUserAlreadyExists = async (req, res) => {
   const { email } = req.body;
   const foundUser = await getUserByEmail(email);
 
-  if (foundUser) {
-    return commonReturn(res, "User Already Registered");
+  if (foundUser?.password) return commonReturn(res, "User Already Registered");
+  else if (foundUser) {
+    return commonReturn(res, "User Verified");
   } else if (req?.user?.role === "superAdmin") {
     // send mail to that user to register
     await sendLinkViaSendGrid(email);
@@ -25,14 +30,18 @@ export const signUp = async (req, res) => {
   const saltRounds = 10;
   const hashedPassword = await hash(password, saltRounds);
   try {
-    await createUser(email, hashedPassword);
-  } catch {
+    await updateUserPassword(email, hashedPassword);
+  } catch (err) {
+    console.log("vsdvsddvsvd", err.message);
+
     // 23505 -> unique_violation in PostgreSQL
     if (err.code === "23505") {
-      commonReturn(res, "User Already Exists", null, 400);
-    } else commonReturn(res, null, null, 500);
+      return commonReturn(res, "User Already Exists", null, 400);
+    } else if (err.code === 999)
+      return commonReturn(res, err.message, null, 400);
+    else return commonReturn(res, null, null, 500);
   }
-  return commonReturn(res, "Password Set Successfully");
+  return commonReturn(res, "Registered successfully");
 };
 
 export const signIn = async (req, res) => {
@@ -62,5 +71,6 @@ export const verifyOTP = async (req, res) => {
   if (storedOtp !== OTP) return commonReturn(res, "Invalid OTP", null, 400);
 
   await redisClient.del(`otp:${email}`);
+  await createUser(email);
   return commonReturn(res, "OTP verified successfully");
 };
