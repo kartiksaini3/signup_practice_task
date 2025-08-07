@@ -57,9 +57,14 @@ export const signIn = async (req, res) => {
 };
 
 export const sendOTP = async (req, res) => {
-  const { email } = req.body;
-  await sendOTPViaSendGrid(email);
-  return commonReturn(res, `OTP sent to ${email}`);
+  try {
+    const { email } = req.body;
+    await sendOTPViaSendGrid(email);
+    return commonReturn(res, `OTP sent to ${email}`);
+  } catch (er) {
+    console.log("errrr", er);
+    return commonReturn(res, undefined, undefined, 500);
+  }
 };
 
 export const verifyOTP = async (req, res) => {
