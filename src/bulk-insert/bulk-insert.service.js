@@ -6,7 +6,7 @@ export const bulkInsertToTable = async (req, res) => {
   const { tableName } = req.params;
 
   if (!Array.isArray(data)) {
-    return commonReturn(res, 400, false, null, "Invalid data format");
+    return commonReturn(res, 400, false, undefined, "Invalid data format");
   }
 
   const allowedTables = [
@@ -19,13 +19,13 @@ export const bulkInsertToTable = async (req, res) => {
   ];
 
   if (!allowedTables.includes(tableName)) {
-    return commonReturn(res, "Invalid table name", null, 400);
+    return commonReturn(res, "Invalid table name", undefined, 400);
   }
 
   try {
     await bulkInsertDataToTable(data, tableName);
     return commonReturn(res, "Inserted successfully");
   } catch {
-    return commonReturn(res, null, null, 500);
+    return commonReturn(res, undefined, undefined, 500);
   }
 };

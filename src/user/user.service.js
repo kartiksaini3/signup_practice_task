@@ -22,7 +22,7 @@ export const checkIfUserAlreadyExists = async (req, res) => {
   } else if (req?.user?.role === "superAdmin") {
     // send mail to that user to register
     await sendLinkViaSendGrid(email);
-  } else return commonReturn(res, "User not found", null, 404);
+  } else return commonReturn(res, "User not found", undefined, 404);
 };
 
 export const signUp = async (req, res) => {
@@ -36,10 +36,10 @@ export const signUp = async (req, res) => {
 
     // 23505 -> unique_violation in PostgreSQL
     if (err.code === "23505") {
-      return commonReturn(res, "User Already Exists", null, 400);
+      return commonReturn(res, "User Already Exists", undefined, 400);
     } else if (err.code === 999)
-      return commonReturn(res, err.message, null, 400);
-    else return commonReturn(res, null, null, 500);
+      return commonReturn(res, err.message, undefined, 400);
+    else return commonReturn(res, undefined, undefined, 500);
   }
   return commonReturn(res, "Registered successfully");
 };
@@ -53,7 +53,7 @@ export const signIn = async (req, res) => {
       expiresIn: "1h",
     });
     return commonReturn(res, "User signed in successfully", { accessToken });
-  } else return commonReturn(res, "Wrong Credentials Entered.", null, 400);
+  } else return commonReturn(res, "Wrong Credentials Entered.", undefined, 400);
 };
 
 export const sendOTP = async (req, res) => {
@@ -67,8 +67,9 @@ export const verifyOTP = async (req, res) => {
   const storedOtp = await redisClient.get(`otp:${email}`);
 
   if (!storedOtp)
-    return commonReturn(res, "OTP expired or not found", null, 404);
-  if (storedOtp !== OTP) return commonReturn(res, "Invalid OTP", null, 400);
+    return commonReturn(res, "OTP expired or not found", undefined, 404);
+  if (storedOtp !== OTP)
+    return commonReturn(res, "Invalid OTP", undefined, 400);
 
   await redisClient.del(`otp:${email}`);
   await createUser(email);
