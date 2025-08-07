@@ -1,19 +1,20 @@
 import { compare, hash } from "bcrypt";
 import jwt from "jsonwebtoken";
-import { createUser, getUserByUsername } from "./user.repository.js";
+import { createUser, getUserByEmail } from "./user.repository.js";
 import {
   commonReturn,
   sendLinkViaSendGrid,
   sendOTPViaSendGrid,
 } from "../utils/functions.js";
+import { redisClient } from "../redis.js";
 
 export const checkIfUserAlreadyExists = async (req, res) => {
   const { email } = req.body;
-  const foundUser = await getUserByUsername(email);
+  const foundUser = await getUserByEmail(email);
 
   if (foundUser) {
     return commonReturn(res, "User Already Registered");
-  } else if (req.user.role === "superAdmin") {
+  } else if (req?.user?.role === "superAdmin") {
     // send mail to that user to register
     await sendLinkViaSendGrid(email);
   } else return commonReturn(res, "User not found", null, 404);
@@ -24,9 +25,9 @@ export const signUp = async (req, res) => {
   const saltRounds = 10;
   const hashedPassword = await hash(password, saltRounds);
   try {
-    await createUser({ email, hashedPassword }, res);
+    await createUser(email, hashedPassword);
   } catch {
-    // 23505 = unique_violation in PostgreSQL
+    // 23505 -> unique_violation in PostgreSQL
     if (err.code === "23505") {
       commonReturn(res, "User Already Exists", null, 400);
     } else commonReturn(res, null, null, 500);
@@ -36,7 +37,7 @@ export const signUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
   const { email, password } = req.body;
-  const foundUser = await getUserByUsername(email);
+  const foundUser = await getUserByEmail(email);
 
   if (foundUser && (await compare(password, foundUser.password))) {
     const accessToken = jwt.sign(req.body, process.env.JWT_SECRET, {

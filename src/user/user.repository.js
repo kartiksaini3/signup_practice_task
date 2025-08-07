@@ -1,14 +1,6 @@
-import { Client } from "pg";
-import dotenv from "dotenv";
-import { commonReturn } from "../utils/functions.js";
+import { poolClient } from "../pool.js";
 
-dotenv.config();
-
-const client = new Client({
-  connectionString: process.env.DB_URL,
-});
-
-export const createUser = async ({ email, hashedPassword }, res) => {
+export const createUser = async (email, hashedPassword) => {
   const query = `
     INSERT INTO users (name, password)
     VALUES ($1, $2)
@@ -16,19 +8,23 @@ export const createUser = async ({ email, hashedPassword }, res) => {
   `;
 
   try {
-    await client.query(query, [email, hashedPassword]);
+    await poolClient.query(query, [email, hashedPassword]);
   } catch (err) {
     throw err;
   }
 };
 
-export const getUserByUsername = async (email) => {
-  const query = `
-    SELECT * FROM users
-    WHERE name = $1
-    LIMIT 1;
-  `;
+export const getUserByEmail = async (email) => {
+  try {
+    const query = `
+      SELECT * FROM users
+      WHERE email = $1
+      LIMIT 1;
+    `;
+    const result = await poolClient.query(query, [email]);
 
-  const result = await client.query(query, [email]);
-  return result.rows[0]; // returns undefined if not found
+    return result.rows[0]; // returns undefined if not found
+  } catch (err) {
+    throw err;
+  }
 };

@@ -1,18 +1,18 @@
-import { Client } from "pg";
+import { Pool } from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const client = new Client({
+const pool = new Pool({
   connectionString: process.env.DB_URL,
 });
 
 export const createTables = async () => {
   try {
-    await client.connect();
+    await pool.connect();
 
     // Create users table
-    await client.query(`
+    await pool.query(`
       CREATE EXTENSION IF NOT EXISTS "pgcrypto";
         CREATE TABLE IF NOT EXISTS users (
           id UUID DEFAULT gen_random_uuid(),
@@ -26,7 +26,7 @@ export const createTables = async () => {
       `);
 
     // Create reports table
-    await client.query(`
+    await pool.query(`
       CREATE EXTENSION IF NOT EXISTS "pgcrypto";
         CREATE TABLE IF NOT EXISTS reports (
           report_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -41,6 +41,6 @@ export const createTables = async () => {
   } catch (err) {
     console.error("Error creating tables:", err);
   } finally {
-    await client.end();
+    await pool.end();
   }
 };

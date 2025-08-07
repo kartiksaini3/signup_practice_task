@@ -1,16 +1,7 @@
-import { Client } from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { poolClient } from "../pool.js";
 
 export const bulkInsertDataToTable = async (data, tableName) => {
-  const client = new Client({
-    connectionString: process.env.DB_URL,
-  });
-
   try {
-    await client.connect();
-
     const createTableQuery = `
       CREATE EXTENSION IF NOT EXISTS "pgcrypto";
       CREATE TABLE IF NOT EXISTS ${tableName} (
@@ -18,7 +9,7 @@ export const bulkInsertDataToTable = async (data, tableName) => {
         name TEXT UNIQUE NOT NULL
       );
     `;
-    await client.query(createTableQuery);
+    await poolClient.query(createTableQuery);
 
     if (!data.length) {
       return { message: "No data to insert.", inserted: [] };
@@ -32,10 +23,8 @@ export const bulkInsertDataToTable = async (data, tableName) => {
       RETURNING *;
     `;
 
-    await client.query(insertQuery, data);
+    await poolClient.query(insertQuery, data);
   } catch (err) {
     throw err;
-  } finally {
-    await client.end();
   }
 };
