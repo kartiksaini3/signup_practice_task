@@ -16,7 +16,7 @@ userRoutes.post(
   checkIfUserAlreadyExists
 );
 userRoutes.post("/check-user", checkIfUserAlreadyExists);
-userRoutes.post("/sign-up", signUp);
-userRoutes.post("/sign-in", signIn);
 userRoutes.post("/send-otp", sendOTP);
 userRoutes.post("/verify-otp", verifyOTP);
+userRoutes.post("/sign-up", signUp);
+userRoutes.post("/sign-in", signIn);
